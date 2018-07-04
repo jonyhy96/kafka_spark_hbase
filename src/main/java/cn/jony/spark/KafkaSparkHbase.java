@@ -38,7 +38,6 @@ public final class KafkaSparkHbase {
                     "  <topics> is a list of one or more kafka topics to consume from\n\n");
             System.exit(1);
         }
-        Gson gson = new Gson();
         String brokers = args[0];
         String topics = args[1];
         SparkConf sparkConf = new SparkConf().setAppName("JavaDirectKafkaWordCount");
@@ -57,6 +56,7 @@ public final class KafkaSparkHbase {
                 LocationStrategies.PreferConsistent(),
                 ConsumerStrategies.Subscribe(topicsSet, kafkaParams));
         JavaDStream<Location> locationJavaDStream = messages.map((Function<ConsumerRecord<String, String>, Location>) stringStringConsumerRecord -> {
+            Gson gson = new Gson();
             return gson.fromJson(stringStringConsumerRecord.value(),Location.class);
         });
         JavaPairDStream<ImmutableBytesWritable, Put> locationPairStream =  locationJavaDStream.mapToPair(new HbasePutConvertFunction());
